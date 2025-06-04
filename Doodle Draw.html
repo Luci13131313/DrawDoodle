@@ -249,41 +249,6 @@
       />
     </div>
     <audio
-      id="draw-sound"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/gymnopedie-no-1-erik-satie.mp3?raw=true"
-      preload="auto"
-    ></audio>
-    <audio
-      id="draw-sound-1"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/baroque-summer.mp3?raw=true"
-      preload="auto"
-    ></audio>
-    <audio
-      id="draw-sound-2"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/chopin-prelude-no-11-opus-28.mp3?raw=true"
-      preload="auto"
-    ></audio>
-    <audio
-      id="draw-sound-3"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/burgmuller-friedrich-innocence-op-100-no-5.mp3?raw=true"
-      preload="auto"
-    ></audio>
-    <audio
-      id="draw-sound-4"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/chopin-prelude-no-7-opus-28-200772.mp3?raw=true"
-      preload="auto"
-    ></audio>
-    <audio
-      id="draw-sound-5"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/Scarlatti-sonata-no-1.mp3?raw=true"
-      preload="auto"
-    ></audio>
-    <audio
-      id="draw-sound-6"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/schumann-scenes-from-childhood-09-on-the-rocking-horse-202087.mp3?raw=true"
-      preload="auto"
-    ></audio>
-    <audio
       id="gameover-sound"
       src="https://github.com/Luci13131313/DrawDoodle/blob/main/Crash.mp3?raw=true"
       preload="auto"
@@ -345,15 +310,7 @@
       ghostCanvas.height = canvas.height;
       const ghostCtx = ghostCanvas.getContext("2d");
 
-      const drawSounds = [
-        document.getElementById("draw-sound"),
-        document.getElementById("draw-sound-1"),
-        document.getElementById("draw-sound-2"),
-        document.getElementById("draw-sound-3"),
-        document.getElementById("draw-sound-4"),
-        document.getElementById("draw-sound-5"),
-        document.getElementById("draw-sound-6"),
-      ];
+      const drawSounds = [];
 
       const drawSoundSrcs = [
         "https://github.com/Luci13131313/DrawDoodle/blob/main/baroque-summer.mp3?raw=true",
@@ -853,8 +810,6 @@
       const assetSources = [
         ...Object.values(shapeImages), // şekil img src
         ...drawSoundSrcs, // çizim sesleri
-        gameOverSound.src,
-        levelUpSound.src,
       ];
 
       let assetsLoaded = 0;
@@ -873,11 +828,11 @@
           const audio = new Audio();
           audio.src = src;
           audio.preload = "auto";
-          audio.load();
           audio.addEventListener("canplaythrough", () => {
-            drawSounds.push(audio); // 🔥 Sadece yüklenenleri al
+            drawSounds.push(audio);
             assetReady();
           });
+          audio.load();
         } else {
           const img = new Image();
           img.src = src;
