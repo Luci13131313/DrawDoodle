@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Draw the Doodle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        font-family: "Segoe UI", sans-serif;
+        background-color: #0b0c1a;
+        color: white;
+      }
+      #game-container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #hud-panel {
+        width: 100%;
+        background: linear-gradient(135deg, #2e003e, #1c1c2e);
+        border: 8px solid var(--frame-color, #555);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      #hud-panel div {
+        font-size: 18px;
+        color: #fff;
+        text-shadow: 1px 1px 3px #000;
+      }
+
+      #task-display {
+        text-align: center;
+        margin-top: 8px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #ffb3ff;
+      }
+
+      #draw-area {
+        background: linear-gradient(135deg, #2e003e, #1c1c2e);
+        border: 8px solid var(--frame-color, #555);
+        box-shadow: 0 0 14px var(--frame-color, #555);
+        transition:
+          border-color 0.3s ease,
+          box-shadow 0.3s ease;
+        width: 360px;
+        height: 360px;
+        position: relative;
+        touch-action: none;
+      }
+
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      #start-screen {
+        backdrop-filter: blur(6px);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-image:
+          linear-gradient(rgba(11, 12, 26, 0.8), rgba(42, 10, 55, 0.8)),
+          url("https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/DoodlesBG.jpg?raw=true");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-blend-mode: overlay;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        flex-direction: column;
+        color: black;
+        gap: 12px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      }
+
+      #start-panel {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        padding: 32px;
+        border-radius: 24px;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 90vw;
+        text-align: center;
+      }
+
+      #color-select {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .color-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 3px solid white;
+        cursor: pointer;
+        opacity: 0.85;
+        background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.1)), var(--color);
+        box-shadow: 0 0 0 3px var(--border-color);
+        transition: transform 0.2s ease;
+      }
+      .color-box:hover {
+        transform: scale(1.1);
+      }
+
+      .color-box.selected {
+        box-shadow: 0 0 0 3px white;
+      }
+
+      #color-select.disabled {
+        pointer-events: none;
+        opacity: 0.4;
+        filter: grayscale(1) blur(1px) brightness(0.7);
+        transition: all 0.3s ease-in-out;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="start-screen">
+      <div id="start-panel">
+        <h1>Draw the Doodle</h1>
+        <p>Pick a Colour to Start Doodling</p>
+        <div id="color-select" class="disabled">
+          <div class="color-box" style="background: #7db7ff" data-color="#7db7ff"></div>
+          <div class="color-box" style="background: #ffe96e" data-color="#ffe96e"></div>
+          <div class="color-box" style="background: #ffa788" data-color="#ffa788"></div>
+          <div class="color-box" style="background: #92ffcb" data-color="#92ffcb"></div>
+          <div class="color-box" style="background: #c3c3ff" data-color="#c3c3ff"></div>
+        </div>
+        <div id="tips-box" style="margin-top: 8px; font-size: 14px; max-width: 300px; text-align: center">
+          Draw the Doodle as fast as you can — but don’t you dare lift your finger or mouse! You’ve gotta start and
+          finish in the gray zones, no shortcuts. And whatever you do, stay on the gray path… stray off, and it’s game
+          over. On PC? Use your mouse. On mobile? Your finger or a stylus will do. Let’s see if you’ve got the skills!
+
+          <a target="_blank" style="color: #ffb3ff"> All Sounds from the awesome folks at Pixabay</a> 🎧
+        </div>
+      </div>
+    </div>
+    <div id="game-container" style="display: none">
+      <div id="hud-panel">
+        <div id="timer-display">T: 2</div>
+        <div id="task-display">Draw I</div>
+        <div id="score-display">S: 0</div>
+      </div>
+      <div id="draw-area">
+        <img
+          id="background-image"
+          style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            object-fit: contain;
+            pointer-events: none;
+          "
+        />
+        <canvas
+          id="draw-canvas"
+          width="360"
+          height="360"
+          style="position: absolute; top: 0; left: 0; z-index: 1"
+        ></canvas>
+      </div>
+    </div>
+
+    <div id="end-screen" style="display: none">
+      <h1>Game Over</h1>
+      <div id="final-score">Score: 0</div>
+      <button id="play-again" class="button">Play Again</button>
+    </div>
+    <div
+      id="congrats-screen"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #111;
+        color: white;
+        z-index: 99;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        font-size: 24px;
+      "
+    >
+      <p id="congrats-message"></p>
+      <img
+        id="congrats-image"
+        src=""
+        style="max-width: 80%; max-height: 60vh; margin-top: 16px; border: 4px solid white; border-radius: 12px"
+      />
+    </div>
+    <audio
+      id="draw-sound"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/gymnopedie-no-1-erik-satie.mp3?raw=true"
+      preload="auto"
+    ></audio>
+    <audio
+      id="draw-sound-1"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/baroque-summer.mp3?raw=true"
+      preload="auto"
+    ></audio>
+    <audio
+      id="draw-sound-2"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/chopin-prelude-no-11-opus-28.mp3?raw=true"
+      preload="auto"
+    ></audio>
+    <audio
+      id="draw-sound-3"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/burgmuller-friedrich-innocence-op-100-no-5.mp3?raw=true"
+      preload="auto"
+    ></audio>
+    <audio
+      id="draw-sound-4"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/chopin-prelude-no-7-opus-28-200772.mp3?raw=true"
+      preload="auto"
+    ></audio>
+    <audio
+      id="draw-sound-5"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/Scarlatti-sonata-no-1.mp3?raw=true"
+      preload="auto"
+    ></audio>
+    <audio
+      id="draw-sound-6"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/schumann-scenes-from-childhood-09-on-the-rocking-horse-202087.mp3?raw=true"
+      preload="auto"
+    ></audio>
+    <audio
+      id="gameover-sound"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/Crash.mp3?raw=true"
+      preload="auto"
+    ></audio>
+    <audio
+      id="levelup-sound"
+      src="https://github.com/Luci13131313/DrawDoodle/blob/main/Levelup.mp3?raw=true"
+      preload="auto"
+    ></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/@farcade/game-sdk@latest/dist/index.min.js"></script>
+    <script>
+      let strokeColor = "#66ccff";
+      // Global değişken tanımları
+
+      document.querySelectorAll(".color-box").forEach((box) => {
+        box.classList.add("disabled"); // İlk başta pasif
+        box.style.pointerEvents = "none"; // Güvenli olsun
+      });
+
+      // Görsel ve ses yüklemeyi geciktirme simülasyonu
+      setTimeout(() => {
+        document.getElementById("color-select").classList.remove("disabled");
+        document.querySelectorAll(".color-box").forEach((box) => {
+          box.style.pointerEvents = "auto";
+        });
+      }, 4000); // 4 saniye sonra aktifleşir
+
+      document.querySelectorAll(".color-box").forEach((box) => {
+        box.addEventListener("click", () => {
+          document.querySelectorAll(".color-box").forEach((b) => b.classList.remove("selected"));
+          box.classList.add("selected");
+
+          document.getElementById("background-image").style.display = "none";
+
+          strokeColor = box.dataset.color;
+          document.documentElement.style.setProperty("--frame-color", strokeColor);
+          document.getElementById("score-display").style.color = strokeColor;
+          document.getElementById("task-display").style.color = strokeColor;
+          document.getElementById("timer-display").style.color = strokeColor;
+
+          // ✅ NEW: Always show tips box when color is selected
+          document.getElementById("tips-box").style.display = "block";
+
+          document.getElementById("start-screen").style.display = "none";
+          document.getElementById("game-container").style.display = "flex";
+          totalScore = 0;
+          currentLevel = 1;
+          window.FarcadeSDK?.singlePlayer?.actions?.ready?.();
+          startLevel();
+        });
+      });
+
+      const canvas = document.getElementById("draw-canvas");
+      const ctx = canvas.getContext("2d");
+
+      const ghostCanvas = document.createElement("canvas");
+      ghostCanvas.width = canvas.width;
+      ghostCanvas.height = canvas.height;
+      const ghostCtx = ghostCanvas.getContext("2d");
+
+      const drawSounds = [
+        document.getElementById("draw-sound"),
+        document.getElementById("draw-sound-1"),
+        document.getElementById("draw-sound-2"),
+        document.getElementById("draw-sound-3"),
+        document.getElementById("draw-sound-4"),
+        document.getElementById("draw-sound-5"),
+        document.getElementById("draw-sound-6"),
+      ];
+
+      const drawSoundSrcs = [
+        "https://github.com/Luci13131313/DrawDoodle/blob/main/baroque-summer.mp3?raw=true",
+        "https://github.com/Luci13131313/DrawDoodle/blob/main/chopin-prelude-no-11-opus-28.mp3?raw=true",
+        "https://github.com/Luci13131313/DrawDoodle/blob/main/burgmuller-friedrich-innocence-op-100-no-5.mp3?raw=true",
+        "https://github.com/Luci13131313/DrawDoodle/blob/main/chopin-prelude-no-7-opus-28-200772.mp3?raw=true",
+        "https://github.com/Luci13131313/DrawDoodle/blob/main/Scarlatti-sonata-no-1.mp3?raw=true",
+        "https://github.com/Luci13131313/DrawDoodle/blob/main/schumann-scenes-from-childhood-09-on-the-rocking-horse-202087.mp3?raw=true",
+        "https://github.com/Luci13131313/DrawDoodle/blob/main/gymnopedie-no-1-erik-satie.mp3?raw=true",
+      ];
+
+      let currentDrawSound = null;
+
+      const gameOverSound = document.getElementById("gameover-sound");
+      const levelUpSound = document.getElementById("levelup-sound");
+
+      let drawing = false;
+      let path = [];
+      let startZone, endZone;
+      let totalScore = 0;
+      let currentLevel = 1;
+      let timeLimit = 100;
+      let startTime;
+      let playerLineWidth = 6;
+      let animationFrameId;
+      let isMuted = false;
+
+      const scoreDisplay = document.getElementById("score-display");
+      const timerDisplay = document.getElementById("timer-display");
+      const taskDisplay = document.getElementById("task-display");
+      const startScreen = document.getElementById("start-screen");
+      const endScreen = document.getElementById("end-screen");
+      const finalScore = document.getElementById("final-score");
+
+      const shapes = [
+        "Verified",
+        "Pickle",
+        "Poop",
+        "Crown",
+        "WizardHat",
+        "BoomBox",
+        "IceCream",
+        "Lolly",
+        "Hue",
+        "Stoke",
+        "HapMello",
+        "Deysi",
+        "Snail",
+        "Doopie04",
+        "Hap",
+        "Balloon",
+        "RunHap",
+        "MediHap",
+      ];
+
+      const shapeImages = {
+        Poop: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Poop.png?raw=true",
+        Pickle: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Pickle.png?raw=true",
+        Crown: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Crown.png?raw=true",
+        Verified: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Verified.png?raw=true",
+        Snail: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Snail.png?raw=true",
+        IceCream: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/IceCream.png?raw=true",
+        Hap: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Hap.png?raw=true",
+        Balloon: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Balloon.png?raw=true",
+        Hue: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Hue.png?raw=true",
+        BoomBox: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/BoomBox.png?raw=true",
+        Deysi: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Deysi.png?raw=true",
+        HapMello: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/HapMello.png?raw=true",
+        MediHap: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/MediHap.png?raw=true",
+        Lolly: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Lolly.png?raw=true",
+        RunHap: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/RunHap.png?raw=true",
+        Stoke: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Stoke.png?raw=true",
+        Doopie04: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/doopie04.png?raw=true",
+        WizardHat: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/WizardHat.png?raw=true",
+      };
+
+      const getLevelShape = (lvl) => shapes[(lvl - 1) % shapes.length];
+
+      const distance = (p1, p2) => Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+      const inCircle = (p, c) => distance(p, c) < 20;
+
+      const baseTimePerShape = {
+        Poop: 30,
+        Pickle: 10,
+        Crown: 30,
+        Verified: 10,
+        Snail: 50,
+        IceCream: 30,
+        Hap: 50,
+        Balloon: 30,
+        Hue: 30,
+        BoomBox: 30,
+        Deysi: 30,
+        HapMelo: 30,
+        MediHap: 50,
+        Lolly: 30,
+        RunHap: 50,
+        Stoke: 30,
+        Doopie04: 50,
+        WizardHat: 30,
+      };
+
+      const congratsMessages = [
+        "Congrats! You drew ${shape}",
+        "Well done! You made ${shape}",
+        "WoOoW! You nailed ${shape}",
+        "Good Job! You done ${shape}",
+        "Impressive! You're an artist!",
+        "Brain = 9000. You drew ${shape}",
+        "Sizzlin’ skills! ${shape} complete!",
+        "Spot on! That’s a perfect ${shape}",
+        "Magic touch! Hello ${shape}",
+        "Nailed it! ${shape} unlocked",
+        "Air high-five for that ${shape}!",
+        "The wizard approves your ${shape}",
+        "That ${shape} was out of this world!",
+      ];
+
+      function getTimeLimit(level) {
+        const shape = getLevelShape(level);
+        const base = baseTimePerShape[shape] || 100;
+
+        const cycle = Math.floor((level - 1) / shapes.length);
+        const difficultyScale = Math.max(0.4, 1 - cycle * 0.1); // döngü başına %10 kısalt
+        return Math.floor(base * difficultyScale);
+      }
+
+      function drawGhostPath(ctx, shape, ghostLineWidth = 24) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#aaa";
+        ctx.lineWidth = ghostLineWidth; // 🔧 Parametre ile gelen Ghost Path kalınlığı
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        const svgPaths = {
+          Poop: {
+            path: "M190 90 L210 110 L230 130 L210 150 H190 H170 H150 L130 170 L110 190 L90 210 L110 230 H130 H150 H170 H190 H210 H230 H250 H270 H290 L310 250 V270 L290 290 H270 H250 H230 H210 H190 H170 H150 H130 H110 H90 H70 H50 L30 270",
+            start: { x: 190, y: 90 },
+            end: { x: 30, y: 270 },
+          },
+          Pickle: {
+            path: "M130 30 L150 50 L170 70 L190 90 V110 V130 V150 V170 V190 V210 V230 V250 V270 L170 290 L150 310",
+            start: { x: 130, y: 30 },
+            end: { x: 150, y: 310 },
+          },
+          Verified: {
+            path: "M170 190 L190 210 L210 190 L230 170 L250 150",
+            start: { x: 170, y: 190 },
+            end: { x: 250, y: 150 },
+          },
+          Snail: {
+            path: "M50 10 L70 30 H90 H110 V50 V70 V90 H90 H70 V110 L50 130 V150 L30 170 V190 V210 V230 V250 V270 V290 L50 310 L70 330 L90 350 H110 H130 H150 H170 V330 L150 310 V290 L130 270 V250 V230 H150 H170 V250 L190 270 L150 210 V190 L170 170 L190 150 H210 H230 H250 H270 L290 170 L310 190 L330 210 V230 V250 V270 L310 290 L290 310 H270 H250 H230 V290 V270 V250 V230 H250 H270 V250 V270",
+            start: { x: 50, y: 10 },
+            end: { x: 270, y: 270 },
+          },
+          IceCream: {
+            path: "M130 150 L110 130 V110 V90 L130 70 L150 50 L170 30 H190 H210 H230 H250 L270 50 L290 70 L310 90 V110 V130 L290 150 L270 170 L250 190 V210 H230 V230 V250 H210 V270 V290 L190 310 H170 H150 H130 V290 H110 V270 V250 V230 V210 V190 H130 L150 210 L170 230",
+            start: { x: 130, y: 150 },
+            end: { x: 170, y: 230 },
+          },
+          Hap: {
+            path: "M50 30 V50 V70 V90 H30 L50 110 L30 130 V150 V170 V190 V210 V230 V250 V270 L50 290 H70 L90 270 V290 L110 310 L130 330 H150 H170 H190 H210 H230 H250 L270 310 L290 290 V270 V250 V230 V210 V190 V170 V150 V130 V110 V90 V70 V50 L270 30 H250 H230 L210 10 H190 H170 H150 L130 30 L110 50 L90 70 V90 H250 L230 110 L210 90 L190 110 L170 90 L150 110 L130 90 L110 110 V130 L90 150 V170 V190 V210 H70",
+            start: { x: 50, y: 30 },
+            end: { x: 70, y: 210 },
+          },
+          Balloon: {
+            path: "M230 110 L250 90 L230 70 L270 50 H250 H230 H210 V30 V10 H190 H170 H150 V30 V50 H130 H110 H90 L130 70 V90 L150 110 L170 130 L190 150 V170 V190 V210 V230 V250 V270 V290 V310 V330",
+            start: { x: 230, y: 110 },
+            end: { x: 190, y: 330 },
+          },
+          BoomBox: {
+            path: "M110 130 V110 V90 L130 70 H150 H170 H190 H210 H230 L250 90 L270 110 H290 H310 H330 V130 V150 V170 V190 V210 V230 L310 250 H290 L270 270 H250 H230 L210 290 H190 H170 H150 H130 H110 H90 L70 270 V250 V230 V210 V190 V170 V150",
+            start: { x: 110, y: 130 },
+            end: { x: 70, y: 150 },
+          },
+          Deysi: {
+            path: "M150 330 V310 V290 V270 V250 V230 V210 V190 V170 V150 V130 V110 V90 L130 70 V50 L150 30 L170 10 L190 30 H210 L230 50 L210 70 L230 90 L210 110 H190 V130 L210 150 V170 V190 H190 V210 V230 V250 V270 V290 V310 V330 H210",
+            start: { x: 150, y: 330 },
+            end: { x: 210, y: 330 },
+          },
+          HapMello: {
+            path: "M250 30 V50 V70 H270 L250 90 V110 V130 H230 H210 H190 V110 V90 V70 V50 V30 H170 H150 V50 V70 V90 V110 L130 130 V150 V170 H150 V190 V210 V230 V250 V270 V290 V310 V330 H170 H190 V310 V290 V270 V250 V230 V210 V190 V170 H210",
+            start: { x: 250, y: 30 },
+            end: { x: 210, y: 170 },
+          },
+          Hue: {
+            path: "M210 330 H190 V310 V290 V270 V250 V230 V210 H210 V190 V170 V150 V130 L190 110 V90 V70 L210 50 L190 30 H170 H150 V50 V70 V90 V110 V130 L130 150 V170 V190 V210 L150 230 V250 V270 V290 V310 V330",
+            start: { x: 210, y: 330 },
+            end: { x: 150, y: 330 },
+          },
+          Lolly: {
+            path: "M230 310 V290 H210 V270 V250 L230 230 H250 H270 H290 V210 V190 V170 L270 150 V130 L250 110 V90 V70 L230 50 V30 H210 H190 H170 H150 H130 H110 H90 V50 V70 V90 V110 V130 V150 L110 170 V190 V210 L130 230 V250 H150 H170",
+            start: { x: 230, y: 310 },
+            end: { x: 170, y: 250 },
+          },
+          MediHap: {
+            path: "M30 170 V190 H50 H70 H90 H110 H130 V170 L150 150 V130 V110 V90 V70 V50 H170 H190 V70 V90 V110 V130 V150 L210 170 V190 H230 H250 H270 H290 V170 H310 H330 V190 V210 L310 230 L290 250 V270 H270 H250 H230 H210 V290 V310 H190 H170 V290 V270 H150 H130 H110 H90 H70 V250 V230 H90 H110 H130 H150 H170 H190 H210 H230 H250",
+            start: { x: 30, y: 170 },
+            end: { x: 250, y: 230 },
+          },
+          RunHap: {
+            path: "M30 190 L50 170 H70 L90 190 V210 V230 L110 250 H130 L150 230 V210 L130 190 V170 V150 L110 130 V110 V90 V70 L130 50 L150 70 H170 L190 50 V30 H210 H230 L250 50 V70 L230 90 V110 V130 H250 L270 110 L290 90 L310 110 V130 V150 L290 170 H270 H250 H230 H210 L190 190 V210 V230 L210 250 L230 270 L250 290 L270 310 L290 330 L310 310 V290",
+            start: { x: 30, y: 190 },
+            end: { x: 310, y: 290 },
+          },
+          Doopie04: {
+            path: "M310 110 V90 L290 70 L270 50 H250 H230 L210 70 V90 V110 V130 L230 150 H250 H270 H290 L310 170 V190 L290 210 H270 H250 L230 190 L210 210 H190 H170 L150 190 V170 H130 H110 H90 H70 L50 190 V210 V230 V250 L30 270 V290 L50 310 H70 L90 330 H110 H130 H150 H170 H190 H210 H230 H250 H270 L290 310 V290 V270 L310 250",
+            start: { x: 310, y: 110 },
+            end: { x: 310, y: 250 },
+          },
+          Stoke: {
+            path: "M170 30 H150 H130 L110 50 L130 70 L150 90 L170 110 L150 130 L130 150 L150 170 L130 190 V210 V230 L150 250 V270 V290 V310 V330 L170 350 L190 330 H210 L190 310 V290 V270 V250 V230 V210 L210 190 L230 210 L210 170 L190 150 L210 130 V110 V90 L190 70",
+            start: { x: 170, y: 30 },
+            end: { x: 190, y: 70 },
+          },
+          Crown: {
+            path: "M210 90 L230 110 V130 L250 150 L270 170 L290 150 L310 130 L330 150 V170 V190 V210 V230 V250 L310 270 H290 H270 H250 H230 H210 H190 H170 H150 H130 H110 H90 L70 250 H50 L30 230 V210 V190 V170 V150 V130 L50 110 L70 130 L90 150 H110 L130 130 L150 110 L170 90",
+            start: { x: 210, y: 90 },
+            end: { x: 170, y: 90 },
+          },
+          WizardHat: {
+            path: "M70 130 V110 V90 V70 L90 50 H110 H130 H150 L170 70 L190 90 L210 110 L230 130 L250 150 V170 L270 190 H290 H310 L330 210 V230 L310 250 L290 270 H270 L250 290 H230 H210 L190 310 H170 H150 H130 H110 H90 H70 L50 290 L30 270 L50 250 L70 230 L90 210 V190 V170",
+            start: { x: 70, y: 130 },
+            end: { x: 90, y: 170 },
+          },
+        };
+
+        const data = svgPaths[shape];
+        if (!data) return;
+
+        const path = new Path2D(data.path);
+        ctx.stroke(path);
+
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(110, 110, 110)";
+        ctx.arc(data.start.x, data.start.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(data.end.x, data.end.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        startZone = data.start;
+        endZone = data.end;
+      }
+
+      function getCanvasPos(e) {
+        const r = canvas.getBoundingClientRect();
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: x - r.left, y: y - r.top };
+      }
+
+      function evaluatePath() {
+        const startedAtStart = inCircle(path[0], startZone);
+        const startedAtEnd = inCircle(path[0], endZone);
+        const finishedAtStart = path.some((p) => inCircle(p, startZone));
+        const finishedAtEnd = path.some((p) => inCircle(p, endZone));
+        const reachedOtherEnd = (startedAtStart && finishedAtEnd) || (startedAtEnd && finishedAtStart);
+
+        if (!reachedOtherEnd || path.length < 5) return endGame();
+
+        const elapsed = (Date.now() - startTime) / 1000;
+        const score = Math.floor(currentLevel * 10 * Math.max(1, 2 - elapsed / timeLimit));
+        totalScore += score;
+
+        levelUpSound.currentTime = 0;
+        levelUpSound.play();
+
+        cancelAnimationFrame(animationFrameId);
+
+        const shape = getLevelShape(currentLevel);
+
+        const randomMsg = congratsMessages[Math.floor(Math.random() * congratsMessages.length)];
+        taskDisplay.textContent = randomMsg.replace("${shape}", shape);
+
+        // ✅ Show background image only
+        const bg = document.getElementById("background-image");
+        bg.src = shapeImages[shape] || "";
+        bg.style.display = "block";
+
+        canvas.style.display = "none";
+        ghostCanvas.style.display = "none";
+
+        setTimeout(() => {
+          canvas.style.display = "block";
+          ghostCanvas.style.display = "block";
+          currentLevel++;
+          startLevel();
+        }, 2000);
+      }
+
+      function startDrawing(e) {
+        const pos = getCanvasPos(e);
+
+        // 🎯 Sadece başlangıç veya bitiş dairesine tıklanırsa başla
+        if (!inCircle(pos, startZone) && !inCircle(pos, endZone)) return;
+
+        drawing = true;
+        path = [pos];
+
+        // 🔇 Ses yoksa erken çık
+        if (drawSounds.length === 0) {
+          console.warn("No draw sounds loaded.");
+          return;
+        }
+
+        // 🔇 Önce tüm sesleri durdur
+        drawSounds.forEach((s) => {
+          s.pause();
+          s.currentTime = 0;
+        });
+
+        // 🔊 Rastgele hazır ses seç
+        currentDrawSound = drawSounds[Math.floor(Math.random() * drawSounds.length)];
+
+        if (!isMuted && currentDrawSound) {
+          currentDrawSound.loop = true;
+          currentDrawSound.muted = false;
+          currentDrawSound.play().catch((err) => console.warn("Draw sound error:", err));
+        }
+      }
+
+      function draw(e) {
+        if (!drawing) return;
+        const pos = getCanvasPos(e);
+        path.push(pos);
+
+        const pixel = ghostCtx.getImageData(pos.x, pos.y, 1, 1).data;
+        const r = pixel[0],
+          g = pixel[1],
+          b = pixel[2];
+        const isGray = Math.abs(r - g) < 20 && Math.abs(g - b) < 20 && r >= 100 && r <= 200;
+
+        if (!isGray) {
+          drawing = false;
+          return endGame();
+        }
+
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = playerLineWidth;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        const last = path[path.length - 2];
+        if (last) {
+          ctx.moveTo(last.x, last.y);
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+        }
+      }
+
+      function stopDrawing() {
+        if (!drawing) return;
+        drawing = false;
+        evaluatePath();
+        if (currentDrawSound) {
+          currentDrawSound.pause();
+          currentDrawSound.currentTime = 0;
+        }
+      }
+
+      function startLevel() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const ghostLineWidth = Math.max(6, 24 - (currentLevel - 6) / shapes.length);
+        playerLineWidth = Math.max(1, 6 - ((currentLevel - 1) * 0.75) / shapes.length);
+
+        const shape = getLevelShape(currentLevel);
+
+        // 🎯 1.5s sonra yeni görev mesajı yaz
+        setTimeout(() => {
+          taskDisplay.textContent = `Draw ${shape}`;
+        }, 1000);
+
+        // ❌ Hide background image before drawing starts
+        document.getElementById("background-image").style.display = "none";
+
+        drawGhostPath(ctx, shape, ghostLineWidth);
+        drawGhostPath(ghostCtx, shape, ghostLineWidth);
+
+        updateHUD();
+        startTime = Date.now();
+        timeLimit = getTimeLimit(currentLevel);
+        animationFrameId = requestAnimationFrame(tick);
+      }
+
+      const updateHUD = () => {
+        document.getElementById("score-display").textContent = `🏆 ${totalScore}`;
+        document.getElementById("task-display").textContent = `Draw ${shapes[(currentLevel - 1) % shapes.length]}`;
+      };
+
+      const tick = () => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        timeRemaining = Math.max(0, timeLimit - Math.floor(elapsed));
+        document.getElementById("timer-display").textContent = `Time: ${timeRemaining}`;
+        if (timeRemaining <= 10) {
+          timerDisplay.classList.add("warning");
+        } else {
+          timerDisplay.classList.remove("warning");
+        }
+        if (timeRemaining <= 0) {
+          drawing = false;
+          endGame();
+        } else {
+          animationFrameId = requestAnimationFrame(tick);
+        }
+      };
+
+      function showCongratsScreen(shape, nextLevelCallback) {
+        const screen = document.getElementById("congrats-screen");
+        const msg = document.getElementById("congrats-message");
+        const img = document.getElementById("congrats-image");
+
+        msg.textContent = `🎉 Congrats! You drew ${shape}`;
+        img.src = shapeImages[shape] || "";
+
+        const bg = document.getElementById("background-image");
+        bg.src = shapeImages[shape] || "";
+        bg.style.display = "block";
+
+        screen.style.display = "flex";
+
+        setTimeout(() => {
+          screen.style.display = "none";
+          nextLevelCallback();
+        }, 2000);
+      }
+
+      const endGame = () => {
+        try {
+          window.FarcadeSDK?.singlePlayer?.actions?.gameOver?.({ score: totalScore });
+        } catch (e) {
+          console.warn("GameOver report failed:", e);
+        }
+
+        if (currentDrawSound) {
+          currentDrawSound.pause();
+          currentDrawSound.currentTime = 0;
+        }
+
+        gameOverSound.currentTime = 0;
+        gameOverSound.play();
+      };
+
+      document.getElementById("play-again").addEventListener("click", () => {
+        cancelAnimationFrame(animationFrameId);
+        document.getElementById("end-screen").style.display = "none";
+        totalScore = 0;
+        currentLevel = 1;
+        startLevel();
+      });
+
+      window.FarcadeSDK?.on?.("play_again", () => {
+        cancelAnimationFrame(animationFrameId);
+        document.getElementById("end-screen").style.display = "none";
+        totalScore = 0;
+        currentLevel = 1;
+        startLevel();
+      });
+
+      window.FarcadeSDK?.on?.("toggle_mute", () => {
+        isMuted = !isMuted;
+
+        if (isMuted) {
+          [...drawSounds, gameOverSound, levelUpSound].forEach((s) => {
+            s.pause();
+            s.muted = true;
+          });
+        } else {
+          [...drawSounds, gameOverSound, levelUpSound].forEach((s) => {
+            s.muted = false;
+          });
+        }
+
+        console.log("🔊 Mute toggled:", isMuted ? "ON (muted)" : "OFF (sound on)");
+      });
+
+      const assetSources = [
+        ...Object.values(shapeImages), // şekil img src
+        ...drawSoundSrcs, // çizim sesleri
+        gameOverSound.src,
+        levelUpSound.src,
+      ];
+
+      let assetsLoaded = 0;
+
+      function assetReady() {
+        assetsLoaded++;
+        if (assetsLoaded === assetSources.length) {
+          console.log("✅ All assets loaded!");
+          document.getElementById("color-select").classList.remove("disabled");
+          window.FarcadeSDK?.singlePlayer?.actions?.ready?.(); // 🔥 SDK'ya hazırız sinyali
+        }
+      }
+
+      assetSources.forEach((src) => {
+        if (src.endsWith(".mp3")) {
+          const audio = new Audio();
+          audio.src = src;
+          audio.preload = "auto";
+          audio.load();
+          audio.addEventListener("canplaythrough", () => {
+            drawSounds.push(audio); // 🔥 Sadece yüklenenleri al
+            assetReady();
+          });
+        } else {
+          const img = new Image();
+          img.src = src;
+          img.onload = assetReady;
+        }
+      });
+
+      canvas.addEventListener("mousedown", startDrawing);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", stopDrawing);
+
+      canvas.addEventListener("touchstart", startDrawing);
+      canvas.addEventListener("touchmove", draw);
+      canvas.addEventListener("touchend", stopDrawing);
+    </script>
+  </body>
+</html>
