@@ -248,16 +248,8 @@
         style="max-width: 60%; max-height: 40vh; margin-top: 16px; border: 4px solid white; border-radius: 12px"
       />
     </div>
-    <audio
-      id="gameover-sound"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/Crash.mp3?raw=true"
-      preload="auto"
-    ></audio>
-    <audio
-      id="levelup-sound"
-      src="https://github.com/Luci13131313/DrawDoodle/blob/main/Levelup.mp3?raw=true"
-      preload="auto"
-    ></audio>
+    <audio id="gameover-sound" src="Crash.mp3" preload="auto"></audio>
+    <audio id="levelup-sound" src="Levelup.mp3" preload="auto"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/@farcade/game-sdk@latest/dist/index.min.js"></script>
     <script>
@@ -268,14 +260,6 @@
         box.classList.add("disabled"); // İlk başta pasif
         box.style.pointerEvents = "none"; // Güvenli olsun
       });
-
-      // Görsel ve ses yüklemeyi geciktirme simülasyonu
-      setTimeout(() => {
-        document.getElementById("color-select").classList.remove("disabled");
-        document.querySelectorAll(".color-box").forEach((box) => {
-          box.style.pointerEvents = "auto";
-        });
-      }, 4000); // 4 saniye sonra aktifleşir
 
       document.querySelectorAll(".color-box").forEach((box) => {
         box.addEventListener("click", () => {
@@ -308,18 +292,18 @@
       const ghostCanvas = document.createElement("canvas");
       ghostCanvas.width = canvas.width;
       ghostCanvas.height = canvas.height;
-        const ghostCtx = ghostCanvas.getContext("2d", { willReadFrequently: true });
+      const ghostCtx = ghostCanvas.getContext("2d", { willReadFrequently: true });
 
       const drawSounds = [];
 
       const drawSoundSrcs = [
-        "https://github.com/Luci13131313/DrawDoodle/blob/main/baroque-summer.mp3?raw=true",
-        "https://github.com/Luci13131313/DrawDoodle/blob/main/chopin-prelude-no-11-opus-28.mp3?raw=true",
-        "https://github.com/Luci13131313/DrawDoodle/blob/main/burgmuller-friedrich-innocence-op-100-no-5.mp3?raw=true",
-        "https://github.com/Luci13131313/DrawDoodle/blob/main/chopin-prelude-no-7-opus-28-200772.mp3?raw=true",
-        "https://github.com/Luci13131313/DrawDoodle/blob/main/Scarlatti-sonata-no-1.mp3?raw=true",
-        "https://github.com/Luci13131313/DrawDoodle/blob/main/schumann-scenes-from-childhood-09-on-the-rocking-horse-202087.mp3?raw=true",
-        "https://github.com/Luci13131313/DrawDoodle/blob/main/gymnopedie-no-1-erik-satie.mp3?raw=true",
+        "baroque-summer.mp3",
+        "chopin-prelude-no-11-opus-28.mp3",
+        "burgmuller-friedrich-innocence-op-100-no-5.mp3",
+        "chopin-prelude-no-7-opus-28-200772.mp3",
+        "Scarlatti-sonata-no-1.mp3",
+        "schumann-scenes-from-childhood-09-on-the-rocking-horse-202087.mp3",
+        "gymnopedie-no-1-erik-satie.mp3",
       ];
 
       let currentDrawSound = null;
@@ -372,25 +356,24 @@
       ];
 
       const shapeImages = {
-        Poop: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Poop.png?raw=true",
-        Pickle: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Pickle.png?raw=true",
-        Crown: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Crown.png?raw=true",
-        Verified: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Verified.png?raw=true",
-        Snail: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Snail.png?raw=true",
-        IceCream: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/IceCream.png?raw=true",
-        Hap: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Hap.png?raw=true",
-        Balloon: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Balloon.png?raw=true",
-        Hue: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Hue.png?raw=true",
-        BoomBox: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/BoomBox.png?raw=true",
-        Deysi: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Deysi.png?raw=true",
-        HapMello: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/HapMello.png?raw=true",
-        MediHap: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/MediHap.png?raw=true",
-        Lolly: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Lolly.png?raw=true",
-        RunHap: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/RunHap.png?raw=true",
-        Stoke: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Stoke.png?raw=true",
-        Doopie04: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/doopie04.png?raw=true",
-        WizardHat: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/WizardHat.png?raw=true",
-        Pegion:"https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Pigeon.png?raw=true",
+        Poop: "assets/images/Poop.png",
+        Pickle: "assets/images/Pickle.png",
+        Crown: "assets/images/Crown.png",
+        Verified: "assets/images/Verified.png",
+        Snail: "assets/images/Snail.png",
+        IceCream: "assets/images/IceCream.png",
+        Hap: "assets/images/Hap.png",
+        Balloon: "assets/images/Balloon.png",
+        Hue: "assets/images/Hue.png",
+        BoomBox: "assets/images/BoomBox.png",
+        Deysi: "assets/images/Deysi.png",
+        HapMello: "assets/images/HapMello.png",
+        MediHap: "assets/images/MediHap.png",
+        Lolly: "assets/images/Lolly.png",
+        RunHap: "assets/images/RunHap.png",
+        Stoke: "assets/images/Stoke.png",
+        Doopie04: "assets/images/doopie04.png",
+        WizardHat: "assets/images/WizardHat.png",
       };
 
       const getLevelShape = (lvl) => shapes[(lvl - 1) % shapes.length];
@@ -456,7 +439,7 @@
           Pegion: {
             path: "M230 50 V70 V90 H250 H270 L290 70 L310 90 V110 L290 130 L270 150 H250 H230 H210 H190 L170 130 L150 110 L130 90 V70 V50 V30 H110 L90 50 L70 70 V90 L50 110 L70 130 H90 L110 150 L130 170 V190 V210 V230 V250 L150 270 V290 L170 310 L190 330 H210 V310 V290 V270 H230 H250 V250 V230 V210 V190",
             start: { x: 230, y: 50 },
-            end: { x: 250, y: 190},
+            end: { x: 250, y: 190 },
           },
           Poop: {
             path: "M190 90 L210 110 L230 130 L210 150 H190 H170 H150 L130 170 L110 190 L90 210 L110 230 H130 H150 H170 H190 H210 H230 H250 H270 H290 L310 250 V270 L290 290 H270 H250 H230 H210 H190 H170 H150 H130 H110 H90 H70 H50 L30 270",
@@ -836,15 +819,25 @@
           const audio = new Audio();
           audio.src = src;
           audio.preload = "auto";
-          audio.addEventListener("canplaythrough", () => {
-            drawSounds.push(audio);
+
+          const onReady = () => {
+            drawSounds.push(audio); // Only use playable sounds
             assetReady();
-          });
+          };
+
+          const onError = (e) => {
+            console.warn("Failed to load audio", src, e);
+            assetReady();
+          };
+
+          audio.addEventListener("canplaythrough", onReady, { once: true });
+          audio.addEventListener("error", onError, { once: true });
           audio.load();
         } else {
           const img = new Image();
           img.src = src;
           img.onload = assetReady;
+          img.onerror = assetReady;
         }
       });
 
