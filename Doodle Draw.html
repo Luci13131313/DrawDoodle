@@ -189,7 +189,6 @@
         <div id="timer-display">T: 2</div>
         <div id="task-display">Draw I</div>
         <div id="score-display">S: 0</div>
-        <button id="fs-btn" class="hud-btn">⤢</button>
       </div>
       <div id="draw-area">
         <img
@@ -369,6 +368,8 @@
       const levelUpSound = document.getElementById("levelup-sound");
 
       const baseLineWidth = window.innerWidth < 500 ? 8 : 6;
+      const baseGhostWidth = window.innerWidth < 500 ? 30 : 24;
+      const startEndRadius = window.innerWidth < 500 ? 18 : 12;
       let playerLineWidth = baseLineWidth;
 
       let drawing = false;
@@ -432,8 +433,8 @@
 
       const getLevelShape = (lvl) => shapes[(lvl - 1) % shapes.length];
 
-      const distance = (p1, p2) => Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
-      const inCircle = (p, c) => distance(p, c) < 20;
+      const distance = (p1, p2) => Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
+      const inCircle = (p, c) => distance(p, c) < startEndRadius + 4;
 
       const baseTimePerShape = {
         Poop: 30,
@@ -447,7 +448,7 @@
         Hue: 30,
         BoomBox: 30,
         Deysi: 30,
-        HapMelo: 30,
+        HapMello: 30,
         MediHap: 50,
         Lolly: 30,
         RunHap: 50,
@@ -481,7 +482,7 @@
         return Math.floor(base * difficultyScale);
       }
 
-      function drawGhostPath(ctx, shape, ghostLineWidth = 24) {
+      function drawGhostPath(ctx, shape, ghostLineWidth = 30) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = "#aaa";
         ctx.lineWidth = ghostLineWidth; // 🔧 Parametre ile gelen Ghost Path kalınlığı
@@ -589,11 +590,11 @@
 
         ctx.beginPath();
         ctx.fillStyle = "rgba(110, 110, 110)";
-        ctx.arc(data.start.x, data.start.y, 12, 0, Math.PI * 2);
+        ctx.arc(data.start.x, data.start.y, startEndRadius, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.arc(data.end.x, data.end.y, 12, 0, Math.PI * 2);
+        ctx.arc(data.end.x, data.end.y, startEndRadius, 0, Math.PI * 2);
         ctx.fill();
 
         startZone = data.start;
@@ -604,7 +605,9 @@
         const r = canvas.getBoundingClientRect();
         const x = e.touches ? e.touches[0].clientX : e.clientX;
         const y = e.touches ? e.touches[0].clientY : e.clientY;
-        return { x: x - r.left, y: y - r.top };
+        const scaleX = canvas.width / r.width;
+        const scaleY = canvas.height / r.height;
+        return { x: (x - r.left) * scaleX, y: (y - r.top) * scaleY };
       }
 
       function evaluatePath() {
@@ -647,6 +650,7 @@
       }
 
       function startDrawing(e) {
+        e.preventDefault();
         const pos = getCanvasPos(e);
 
         // 🎯 Sadece başlangıç veya bitiş dairesine tıklanırsa başla
@@ -678,6 +682,7 @@
       }
 
       function draw(e) {
+        e.preventDefault();
         if (!drawing) return;
         const pos = getCanvasPos(e);
         path.push(pos);
@@ -705,8 +710,9 @@
         }
       }
 
-      function stopDrawing() {
+      function stopDrawing(e) {
         if (!drawing) return;
+        e.preventDefault();
         drawing = false;
         evaluatePath();
         if (currentDrawSound) {
@@ -718,8 +724,9 @@
       function startLevel() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const ghostLineWidth = Math.max(6, 24 - (currentLevel - 6) / shapes.length);
-        playerLineWidth = Math.max(1, 6 - ((currentLevel - 1) * 0.75) / shapes.length);
+        const ghostLineWidth = Math.max(6, 30 - (currentLevel - 6) / shapes.length);
+        playerLineWidth = Math.max(2,
+          baseLineWidth - ((currentLevel - 1) * 0.75) / shapes.length);
 
         const shape = getLevelShape(currentLevel);
 
@@ -831,15 +838,6 @@
         console.log("🔊 Mute toggled:", isMuted ? "ON (muted)" : "OFF (sound on)");
       });
 
-      document.getElementById('fs-btn').addEventListener('click', () => {
-        const elem = document.documentElement;
-        if (!document.fullscreenElement) {
-          elem.requestFullscreen().catch(err => console.warn('Fullscreen error', err));
-        } else {
-          document.exitFullscreen();
-        }
-      });
-
       const assetSources = [
         ...Object.values(shapeImages), // şekil img src
         ...drawSoundSrcs, // çizim sesleri
@@ -879,8 +877,8 @@
       canvas.addEventListener("mousemove", draw);
       canvas.addEventListener("mouseup", stopDrawing);
 
-      canvas.addEventListener("touchstart", startDrawing);
-      canvas.addEventListener("touchmove", draw);
+      canvas.addEventListener("touchstart", startDrawing, { passive: false });
+      canvas.addEventListener("touchmove", draw, { passive: false });
       canvas.addEventListener("touchend", stopDrawing);
     </script>
   </body>
