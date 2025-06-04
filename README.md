@@ -1,10 +1,8 @@
 # DrawDoodle Bundle Instructions
 
-This project contains an HTML game, **Doodle Draw.html**, along with audio and image assets used by the page. To play the game offline or host it yourself, bundle the HTML file together with the required assets in a single archive.
+This repository contains `Doodle Draw.html` along with the audio and image assets it expects. To run the game on [Farcade](https://farcade.com/) or offline, all of these files must live directly in the zip archive with no extra top-level folder.
 
 ## Required files
-
-Include `Doodle Draw.html` and the following audio and image files:
 
 ### Audio (`.mp3`)
 - Crash.mp3
@@ -17,7 +15,7 @@ Include `Doodle Draw.html` and the following audio and image files:
 - gymnopedie-no-1-erik-satie.mp3
 - schumann-scenes-from-childhood-09-on-the-rocking-horse-202087.mp3
 
-### Images (`assets/images/*.png`)
+### Images (`assets/images/`)
 - assets/images/Balloon.png
 - assets/images/BoomBox.png
 - assets/images/Crown.png
@@ -41,13 +39,14 @@ Include `Doodle Draw.html` and the following audio and image files:
 - assets/images/doopie 04.png
 - assets/images/doopie01.png
 - assets/images/doopie04.png
+- assets/images/DoodlesBG.jpg
 
-## Creating the zip archive
-1. Place `Doodle Draw.html` in a folder along with all the files listed above.
-2. From that folder, run a command like:
+## Packaging for Farcade
+1. Place `Doodle Draw.html` and every file listed above into a single folder.
+2. **From inside that folder**, run:
    ```bash
-   zip -r doodle-draw.zip "Doodle Draw.html" *.mp3 assets/images/*.png
+   zip -r doodle-draw.zip "Doodle Draw.html" *.mp3 assets/images/*
    ```
-   This command adds the HTML file, every `.mp3`, and every `.png` inside `assets/images/` into `doodle-draw.zip`.
+   Running the command from inside ensures the archive does not contain an extra parent directory.
 
-The HTML references these assets with relative paths, so when you upload or distribute the game, ensure the `.mp3` and `assets/images` files remain in the same directory structure next to `Doodle Draw.html`.
+Upload `doodle-draw.zip` to Farcade. Because the archive has no top-level folder, relative paths like `baroque-summer.mp3` and `assets/images/Hap.png` resolve correctly.
