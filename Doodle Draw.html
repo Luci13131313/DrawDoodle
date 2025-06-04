@@ -308,7 +308,7 @@
       const ghostCanvas = document.createElement("canvas");
       ghostCanvas.width = canvas.width;
       ghostCanvas.height = canvas.height;
-      const ghostCtx = ghostCanvas.getContext("2d");
+        const ghostCtx = ghostCanvas.getContext("2d", { willReadFrequently: true });
 
       const drawSounds = [];
 
