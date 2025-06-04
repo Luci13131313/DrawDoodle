@@ -393,6 +393,12 @@
       const finalScore = document.getElementById("final-score");
 
       const shapes = [
+        "Verified",
+        "Pickle",
+        "Poop",
+        "Crown",
+        "WizardHat",
+        "BoomBox",
         "IceCream",
         "Lolly",
         "Hue",
@@ -405,12 +411,6 @@
         "Balloon",
         "RunHap",
         "MediHap",
-        "Verified",
-        "Pickle",
-        "Poop",
-        "Crown",
-        "WizardHat",
-        "BoomBox",
       ];
 
       const shapeImages = {
@@ -829,19 +829,23 @@
         startLevel();
       });
 
-      window.FarcadeSDK?.on?.("toggle_mute", () => {
-        isMuted = !isMuted;
-
-        if (isMuted) {
-          [...drawSounds, gameOverSound, levelUpSound].forEach((s) => {
-            s.pause();
-            s.muted = true;
-          });
+      window.FarcadeSDK?.on?.("toggle_mute", (muted) => {
+        // Farcade SDK passes the desired mute state. If unavailable, just toggle
+        if (typeof muted === "boolean") {
+          isMuted = muted;
         } else {
-          [...drawSounds, gameOverSound, levelUpSound].forEach((s) => {
-            s.muted = false;
-          });
+          isMuted = !isMuted;
         }
+
+        [...drawSounds, gameOverSound, levelUpSound].forEach((s) => {
+          s.muted = isMuted;
+          if (isMuted) {
+            s.pause();
+          } else if (s === currentDrawSound && drawing) {
+            // resume the drawing sound if currently drawing
+            s.play().catch((err) => console.warn("Play error", err));
+          }
+        });
 
         console.log("🔊 Mute toggled:", isMuted ? "ON (muted)" : "OFF (sound on)");
       });
