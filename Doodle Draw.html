@@ -359,6 +359,7 @@
         "IceCream",
         "Lolly",
         "Hue",
+        "Pegion",
         "Stoke",
         "HapMello",
         "Deysi",
@@ -389,6 +390,7 @@
         Stoke: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Stoke.png?raw=true",
         Doopie04: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/doopie04.png?raw=true",
         WizardHat: "https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/WizardHat.png?raw=true",
+        Pegion:"https://github.com/Luci13131313/DrawDoodle/blob/main/assets/images/Pigeon.png?raw=true",
       };
 
       const getLevelShape = (lvl) => shapes[(lvl - 1) % shapes.length];
@@ -397,6 +399,7 @@
       const inCircle = (p, c) => distance(p, c) < startEndRadius + 4;
 
       const baseTimePerShape = {
+        Pegion: 50,
         Poop: 30,
         Pickle: 10,
         Crown: 30,
@@ -450,6 +453,11 @@
         ctx.lineJoin = "round";
 
         const svgPaths = {
+          Pegion: {
+            path: "M230 50 V70 V90 H250 H270 L290 70 L310 90 V110 L290 130 L270 150 H250 H230 H210 H190 L170 130 L150 110 L130 90 V70 V50 V30 H110 L90 50 L70 70 V90 L50 110 L70 130 H90 L110 150 L130 170 V190 V210 V230 V250 L150 270 V290 L170 310 L190 330 H210 V310 V290 V270 H230 H250 V250 V230 V210 V190",
+            start: { x: 230, y: 50 },
+            end: { x: 250, y: 190},
+          },
           Poop: {
             path: "M190 90 L210 110 L230 130 L210 150 H190 H170 H150 L130 170 L110 190 L90 210 L110 230 H130 H150 H170 H190 H210 H230 H250 H270 H290 L310 250 V270 L290 290 H270 H250 H230 H210 H190 H170 H150 H130 H110 H90 H70 H50 L30 270",
             start: { x: 190, y: 90 },
