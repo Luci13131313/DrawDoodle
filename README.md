@@ -1,52 +1,45 @@
-# DrawDoodle Bundle Instructions
+# Draw the Doodles
 
-This repository contains `Doodle Draw.html` along with the audio and image assets it expects. To run the game on [Farcade](https://farcade.com/) or offline, all of these files must live directly in the zip archive with no extra top-level folder.
+A cozy drawing game built for **[Remix](https://remix.gg)** — sketch alongside a
+cast of doodle characters, set to classical piano.
 
-## Required files
+🎮 **[Play it on Remix »](https://remix.gg/g/fc8d3974-d99f-4341-8f12-5d0d91162dca)**
 
-### Audio (`.mp3`)
-- Crash.mp3
-- Levelup.mp3
-- Scarlatti-sonata-no-1.mp3
-- baroque-summer.mp3
-- burgmuller-friedrich-innocence-op-100-no-5.mp3
-- chopin-prelude-no-11-opus-28.mp3
-- chopin-prelude-no-7-opus-28-200772.mp3
-- gymnopedie-no-1-erik-satie.mp3
-- schumann-scenes-from-childhood-09-on-the-rocking-horse-202087.mp3
+## About
+Draw, score and climb the board with a charming crew of doodles (Hap, Deysi, Hue
+and friends) and a soundtrack of Chopin, Satie and Schumann. Mobile-first, portrait.
 
-### Images (`assets/images/`)
-- assets/images/Balloon.png
-- assets/images/BoomBox.png
-- assets/images/Crown.png
-- assets/images/Deysi.png
-- assets/images/Hap.png
-- assets/images/HapMello.png
-- assets/images/Hue.png
-- assets/images/IceCream.png
-- assets/images/Lolly.png
-- assets/images/MediHap.png
-- assets/images/Pencil.png
-- assets/images/Pickle.png
-- assets/images/Pigeon.png
-- assets/images/Poop.png
-- assets/images/Robot.png
-- assets/images/RunHap.png
-- assets/images/Snail.png
-- assets/images/Stoke.png
-- assets/images/Verified.png
-- assets/images/WizardHat.png
-- assets/images/doopie 04.png
-- assets/images/doopie01.png
-- assets/images/doopie04.png
-- assets/images/DoodlesBG.jpg
+## Stats
+_As of June 2026 — pulled with [remix-creator-analytics](https://github.com/Luci13131313/remix-creator-analytics):_
+- **75K+** recorded plays
+- **14.7K** unique players
+- High score: **1,119,006**
 
-## Packaging for Farcade
-1. Place `Doodle Draw.html` and every file listed above into a single folder.
+## Tech
+- Single-file HTML5 game (`Doodle Draw.html`) + image and audio assets
+- Integrated with the Remix SDK (leaderboard, game-over, mute)
+
+---
+Made by **[Luci](https://github.com/Luci13131313)** · Built with Remix 🐰
+
+---
+
+## Build / packaging (legacy)
+
+> Notes from when assets were bundled and uploaded manually (pre-Remix asset hosting).
+
+This repository contains `Doodle Draw.html` along with the audio and image assets it expects. To run the game offline or as a bundle, all of these files must live directly in the zip archive with no extra top-level folder.
+
+### Required files
+
+**Audio (`.mp3`):** Crash, Levelup, Scarlatti-sonata-no-1, baroque-summer, burgmuller-friedrich-innocence-op-100-no-5, chopin-prelude-no-11-opus-28, chopin-prelude-no-7-opus-28-200772, gymnopedie-no-1-erik-satie, schumann-scenes-from-childhood-09-on-the-rocking-horse-202087
+
+**Images (`assets/images/`):** Balloon, BoomBox, Crown, Deysi, Hap, HapMello, Hue, IceCream, Lolly, MediHap, Pencil, Pickle, Pigeon, Poop, Robot, RunHap, Snail, Stoke, Verified, WizardHat, doopie 04, doopie01, doopie04, DoodlesBG.jpg
+
+### Packaging
+1. Place `Doodle Draw.html` and every file above into a single folder.
 2. **From inside that folder**, run:
    ```bash
    zip -r doodle-draw.zip "Doodle Draw.html" *.mp3 assets/images/*
    ```
-   Running the command from inside ensures the archive does not contain an extra parent directory.
-
-Upload `doodle-draw.zip` to Farcade. Because the archive has no top-level folder, relative paths like `baroque-summer.mp3` and `assets/images/Hap.png` resolve correctly.
+   Running the command from inside ensures the archive does not contain an extra parent directory, so relative paths like `baroque-summer.mp3` and `assets/images/Hap.png` resolve correctly.
